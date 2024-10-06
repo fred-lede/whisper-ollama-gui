@@ -1,0 +1,13 @@
+openai-whisper
+transformers
+torch
+pydub
+librosa
+soundfile
+pandas
+requests
+tk
+tkinter
+configparser
+threading
+json
