@@ -1,11 +1,10 @@
-# 將Whisper轉錄出的文字傳送給LLMs進行後處理
+# **將Whisper轉錄出的文字傳送給LLMs進行後處理**
 
 ## **前置準備**
 
-1. **安裝 Python ，如果你已經安裝，就跳過此步驟，我使用的版本是Python 3.10.11，作業系統是Win 11**： 
+1. **安裝 Python ，如果你已經安裝，就跳過此步驟，我使用的版本是Python 3.10.11，作業系統是Win 11：**
    - 確保您已經在 Windows 上安裝了 **Python 3.10.11** 或3.9以上版本 。可以從 [Python 官方網站](https://www.python.org/downloads/windows/) 下載並安裝。
-
-2. **安裝Windows版的Ollama, 本機或其它主機都行，最好是有GPU支援CUDA的最好，AI效能越高的越好：
+2. **安裝Windows版的Ollama, 本機或其它主機都行，最好是有GPU支援CUDA的最好，AI效能越高的越好：**
    - 到[Ollama 的官方網站](https://ollama.com/download) 下載安裝和pull模型。
    - 電腦效能不是太高的話，建議不要下載太大的模型，llama3.2提供1B 、3B共2種參數規模的模型，11B, 90B模型在Ollama沒有
      ，llama3.2:3b速度還不錯，但中文沒那麼溜，可以使用通義千問qwen2.5，有提供 0.5B 、1.5B 、3B 、7B 、14B 、32B 和 72B 共7種參數規模
@@ -18,13 +17,13 @@
      ```
      應該會顯示 Ollama 的版本資訊。
      ```
-	ollama pull llama3.2:3b
-	ollama pull qwen2.5:7b
-	ollama serve 
+     ollama pull llama3.2:3b
+     ollama pull qwen2.5:7b
+     ollama serve 
      ```
      確認模型運行：
      確保模型已成功運行，並且可以通過 API 訪問。例如：
-     ```bash
+     ```
      ollama list
      ```
      應該會顯示正在運行的模型列表，表示你的Ollama已正常運作待命中了。
@@ -50,7 +49,7 @@
    - 驗證安裝：
      打開 **命令提示字元**，執行 `ffmpeg -version`，應顯示 FFmpeg 的版本資訊。
 
-4. **安裝PyTorch’s CUDA support
+4. **安裝PyTorch’s CUDA support**
 
 
 
@@ -71,7 +70,7 @@
    <img width="607" alt="image" src="https://github.com/user-attachments/assets/0c38bdaf-fc4b-4f75-885d-8b55e4689edf">
 
    ```
-   python
+   C:\python
    Python 3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)] on win32
 	Type "help", "copyright", "credits" or "license" for more information.
 	>>> import torch
@@ -80,7 +79,7 @@
 	>>>
     ```   
 	True表示你的CUDA已可使用
-5. **下載Whisper所需要的模型
+5. **下載Whisper所需要的模型**
    ```
     "tiny.en": "https://openaipublic.azureedge.net/main/whisper/models/d3dd57d32accea0b295c96e26691aa14d8822fac7d9d27d5dc00b4ca2826dd03/tiny.en.pt",
     "tiny": "https://openaipublic.azureedge.net/main/whisper/models/65147644a518d12f04e32d6f3b26facc3f8dd46e5390956a9424a650c0ce22b9/tiny.pt",
@@ -110,15 +109,10 @@
 The `.en` models for English-only applications tend to perform better, especially for the `tiny.en` and `base.en` models. We observed that the difference becomes less significant for the `small.en` and `medium.en` models.
 Additionally, the `turbo` model is an optimized version of `large-v3` that offers faster transcription speed with a minimal degradation in accuracy.
    
-## **目錄結構**
-
-   **目錄與檔案初始化**
-
-	 為了確保所有必要的目錄和檔案存在，建議運行以下 Python 腳本來初始化目錄結構和檔案：
-	### **安裝必要的 Python 套件**
-
-     打開 **命令提示字元（Command Prompt）** 或 **PowerShell**，並執行以下命令來安裝所需的套件： 
-	 
+## **目錄與檔案初始化**
+   為了確保所有必要的目錄和檔案存在，建議運行以下 Python 腳本來初始化目錄結構和檔案：
+   **安裝必要的 Python 套件**
+   打開 **命令提示字元（Command Prompt）** 或 **PowerShell**，並執行以下命令來安裝所需的套件： 
 ```
 git clone https://github.com/fred-lede/chat-ollama-win.git
 cd whisper-ollama
@@ -179,7 +173,7 @@ whisper-ollama/
 python whisper-ollama-gui.py
 ```
 
-## 總結：
+## **總結：**
 
 通過上述步驟和程式碼，您可以在 Windows 環境下建立一個完整的音頻轉文字系統，結合 **Whisper** 進行語音轉文字、**Ollama** 管理後處理模型。
 
