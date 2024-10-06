@@ -1,38 +1,37 @@
+### **將Whisper轉錄出的文字傳送給LLMs進行後處理
+
 ### **前置準備**
 
-1. **安裝 Python ，如果你已經安裝，就跳過此步驟，我使用的版本是Python 3.10.11，作業系統是Win 11**：
-   
-   - 確保您已經在 Windows 上安裝了 **Python 3.10.11** 。可以從 [Python 官方網站](https://www.python.org/downloads/windows/) 下載並安裝。
+1. **安裝 Python ，如果你已經安裝，就跳過此步驟，我使用的版本是Python 3.10.11，作業系統是Win 11**： 
+   - 確保您已經在 Windows 上安裝了 **Python 3.10.11** 或3.9以上版本 。可以從 [Python 官方網站](https://www.python.org/downloads/windows/) 下載並安裝。
 
-2. **安裝Windows版的Ollama, 本機或其它主機都行，最好是有GPU支援CUDA的最好，AI效能越高的越好 Llama3.2:3b 模型**：
-
+2. **安裝Windows版的Ollama, 本機或其它主機都行，最好是有GPU支援CUDA的最好，AI效能越高的越好：
    - 到[Ollama 的官方網站](https://ollama.com/download) 下載安裝和pull模型。
-   - 電腦效能不是太高的話，建議不要下載太大的模型，llama3.2 提供1B 、3B共2種參數規模的模型，11B, 90B模型在Ollama沒有
-     ，速度還不錯，但中文沒那麼溜，可以使用通義千問 qwen2.5 提供 0.5B 、1.5B 、3B 、7B 、14B 、32B 和 72B 共7種參數規模
-   - The default Ollama service is http://127.0.01:11434. The app can run directly. If you install Ollama in A 
-     PC and chat-ollama-win in B PC, You need to create a new system Environment Variables as "OLLAMA_HOST=0.0.0.0:11434".
-   - **驗證安裝**：
-   - 打開 **命令提示字元** 或 **PowerShell**，執行以下命令確認 Ollama 是否安裝成功：
+   - 電腦效能不是太高的話，建議不要下載太大的模型，llama3.2提供1B 、3B共2種參數規模的模型，11B, 90B模型在Ollama沒有
+     ，llama3.2:3b速度還不錯，但中文沒那麼溜，可以使用通義千問qwen2.5，有提供 0.5B 、1.5B 、3B 、7B 、14B 、32B 和 72B 共7種參數規模
+   - 預設的Ollama服務是http://127.0.01:11434。應用程式可以直接運行。如果在一台PC上安裝了Ollama，在另一台PC上安裝了whisper-ollama-gui，
+     則Ollama服務主機需要創建一個新的系統環境變數為“Ollama”_主機= 0.0.0.0:11434”。
+   - 驗證安裝：
+     打開 **命令提示字元** 或 **PowerShell**，執行以下命令確認 Ollama 是否安裝成功：
      ```bash
      ollama --version
      ```
-   - 應該會顯示 Ollama 的版本資訊。
-   
-   ```
+     應該會顯示 Ollama 的版本資訊。
+     ```
 	ollama pull llama3.2:3b
 	ollama pull qwen2.5:7b
 	ollama serve 
-   ```
-   **確認模型運行**：
-   - 確保模型已成功運行，並且可以通過 API 訪問。例如：
+     ```
+     確認模型運行：
+     確保模型已成功運行，並且可以通過 API 訪問。例如：
      ```bash
      ollama list
      ```
-   - 應該會顯示正在運行的模型列表。
+     應該會顯示正在運行的模型列表，表示你的Ollama已正常運作待命中了。
 
 3. **安裝 FFmpeg（僅限音頻處理）**
 
-   - pydub** 需要 **FFmpeg** 來處理音頻文件。請按照以下步驟在 Windows 上安裝和配置 FFmpeg：
+   - pydub** 套件需要 **FFmpeg** 來處理音頻文件。請按照以下步驟在 Windows 上安裝和配置 FFmpeg：
 
    - 下載 FFmpeg：
      前往 [FFmpeg 官方下載頁面](https://ffmpeg.org/download.html#build-windows)。
@@ -50,6 +49,21 @@
 
    - 驗證安裝：
      打開 **命令提示字元**，執行 `ffmpeg -version`，應顯示 FFmpeg 的版本資訊。
+
+4. **安裝PyTorch’s CUDA support
+   <img width="607" alt="image" src="https://github.com/user-attachments/assets/0c38bdaf-fc4b-4f75-885d-8b55e4689edf">
+
+	```
+	import torch
+	torch.cuda.is_available()
+	```
+	Python 3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)] on win32
+	Type "help", "copyright", "credits" or "license" for more information.
+	>>> import torch
+	>>> torch.cuda.is_available()
+	True
+	>>>   
+	表示你的CUDA已可使用
    
 ## **目錄結構**
 
