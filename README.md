@@ -1,6 +1,6 @@
-### **將Whisper轉錄出的文字傳送給LLMs進行後處理
+# 將Whisper轉錄出的文字傳送給LLMs進行後處理
 
-### **前置準備**
+## **前置準備**
 
 1. **安裝 Python ，如果你已經安裝，就跳過此步驟，我使用的版本是Python 3.10.11，作業系統是Win 11**： 
    - 確保您已經在 Windows 上安裝了 **Python 3.10.11** 或3.9以上版本 。可以從 [Python 官方網站](https://www.python.org/downloads/windows/) 下載並安裝。
@@ -51,19 +51,35 @@
      打開 **命令提示字元**，執行 `ffmpeg -version`，應顯示 FFmpeg 的版本資訊。
 
 4. **安裝PyTorch’s CUDA support
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
    <img width="607" alt="image" src="https://github.com/user-attachments/assets/0c38bdaf-fc4b-4f75-885d-8b55e4689edf">
 
-	```
-	import torch
-	torch.cuda.is_available()
-	```
-	Python 3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)] on win32
+   ```
+   python
+   Python 3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)] on win32
 	Type "help", "copyright", "credits" or "license" for more information.
 	>>> import torch
 	>>> torch.cuda.is_available()
 	True
-	>>>   
-	表示你的CUDA已可使用
+	>>>
+    ```   
+	True表示你的CUDA已可使用
    
 ## **目錄結構**
 
@@ -74,7 +90,7 @@
 
      打開 **命令提示字元（Command Prompt）** 或 **PowerShell**，並執行以下命令來安裝所需的套件： 
 	 
-```bash
+```
 git clone https://github.com/fred-lede/chat-ollama-win.git
 cd whisper-ollama
 python -m venv venv
@@ -106,7 +122,7 @@ whisper-ollama/
 └── README.md
 ```
 
-### **目錄與檔案說明**
+  **目錄與檔案說明**
 
 - **`vocabularies/professional_vocab.json`**：專有名詞和習慣用語的詞庫，按照專業分類組織。(還沒用上)
 
@@ -126,8 +142,7 @@ whisper-ollama/
 
 - **`README.md`**：說明文件（概覽、安裝指南）。
 
-
-### **運行 GUI 應用程式**
+## **運行 GUI 應用程式**
 
 確保所有依賴已安裝並且詞庫和訂正數據文件已初始化後，運行 **GUI 程式**：
 
@@ -135,7 +150,7 @@ whisper-ollama/
 python whisper-ollama-gui.py
 ```
 
-## **8. 總結**
+## 總結：
 
 通過上述步驟和程式碼，您可以在 Windows 環境下建立一個完整的音頻轉文字系統，結合 **Whisper** 進行語音轉文字、**Ollama** 管理後處理模型。
 
