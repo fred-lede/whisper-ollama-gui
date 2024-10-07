@@ -1,11 +1,9 @@
 openai-whisper
 torch
+torchvision
+torchaudio
 pydub
 librosa
-soundfile
-pandas
-requests
-tkinter
 configparser
-threading
-json
+requests
+soundfile
