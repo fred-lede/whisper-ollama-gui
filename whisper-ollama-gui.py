@@ -181,7 +181,6 @@ def transcribe_audio(model, audio_path, whisper_params, progress_var):
     """
     使用 Whisper 將音頻轉換為文字，根據提供的參數。
     """
-    start_whisper_flickering_in_subprocess()  # 子程序運行，開始閃爍
     
     try:
         progress_var.set(10)
@@ -198,7 +197,7 @@ def post_process_text_with_ollama(server_address, selected_post_model, text, pro
     """
     使用 Ollama 的模型進行文字後處理，考慮專有名詞和習慣用語。
     """
-    start_ollama_flickering_in_subprocess()  # 子程序運行，開始閃爍
+    start_ollama_flickering_in_subprocess()  # 子程序運行，開始閃爍 
     
     try:
         # 根據 Ollama 的實際 API 端點調整
@@ -215,7 +214,7 @@ def post_process_text_with_ollama(server_address, selected_post_model, text, pro
                 "messages": [
                     {
                         "role": "user",
-                        "content": "請根據前後文訂正以下文字的錯別字，一定要先說明訂正錯字的地方，再顯示訂正後的全文：\n" + text
+                        "content": "請根據前後文訂正以下文字的錯別字，請分成二個部分回答，第一個部分先條列說明修改的地方，第二個部分則說明訂正後的全文：\n" + text
                     }
                 ]
             }
@@ -225,17 +224,57 @@ def post_process_text_with_ollama(server_address, selected_post_model, text, pro
                 "messages": [
                     {
                         "role": "user",
-                        "content": "請根據前後文訂正錯字及潤飾以下文字，提升其準確性和可讀性，一定要先說明訂正錯字及潤飾的地方，再顯示訂正後的全文：\n" + text
+                        "content": "請根據前後文訂正錯字及潤飾以下文字，提升其準確性和可讀性，請分成二個部分回答，第一個部分先條列說明訂正錯字及潤飾的地方，第二個部分則說明訂正後的全文：\n" + text
                     }
                 ]
             }
+        elif selected_question_var.get() == "會議摘要":
+            payload = {
+                "model": selected_post_model,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": "請根據前後文訂正錯字並以條列式完成一份專業的會議重點摘要報告，請分成二個部分回答，第一個部分先說明修改的地方，第二個部分則說明你完成的條列式會議摘要報告：\n" + text
+                    }
+                ]
+            }
+        elif selected_question_var.get() == "會議紀錄":
+            payload = {
+                "model": selected_post_model,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": "請根據前後文訂正錯字並完成一份專業的會議紀錄，請分成二個部分回答，第一個部分先說明修改的地方，第二個部分則顯示你完成的會議紀錄：\n" + text
+                    }
+                ]
+            }
+        elif selected_question_var.get() == "重點摘要":
+            payload = {
+                "model": selected_post_model,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": "請根據前後文訂正錯字及潤飾再以條列式完成重點摘要，請分成二個部分回答，第一個部分先說明修改的地方，第二個部分則顯示你完成的條列式重點摘要：\n" + text
+                    }
+                ]
+            }
+        elif selected_question_var.get() == "一行一句":
+            payload = {
+                "model": selected_post_model,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": "請根據前後文修正以下文字的錯別字，並加以潤飾和斷句。請提供兩種回答：第一種回答詳述修改的地方；第二種回答以一行一句的方式呈現。\n\n文字如下：\n" + text + "\n請根據上述要求進行修改。"
+                    }
+                ]
+            }   
         elif selected_question_var.get() == "中文翻譯":
             payload = {
                 "model": selected_post_model,
                 "messages": [
                     {
                         "role": "user",
-                        "content": "請用中文翻譯以下文字：\n" + text
+                        "content": "請用中文翻譯以下文字並以二個版本回答，第一個版本為直接翻譯輸出，第二個版本為翻譯、潤飾再輸出：\n" + text
                     }
                 ]
             }
@@ -245,7 +284,7 @@ def post_process_text_with_ollama(server_address, selected_post_model, text, pro
                 "messages": [
                     {
                         "role": "user",
-                        "content": "請用英文翻譯以下文字：\n" + text
+                        "content": "請用英文翻譯以下文字並以二個版本回答，第一個版本為直接翻譯輸出，第二個版本為翻譯、潤飾再輸出：\n" + text
                     }
                 ]
             }    
@@ -364,16 +403,19 @@ def select_file(text_area_raw, text_area_edit, post_model_selector, whisper_para
             center_custom_messagebox("未設定 Ollama 服務器", "請在配置檔案中設定 Ollama 服務器地址和端口。")
             return
         
-        print(whisper_params)
+        # print(whisper_params)
         # 設定 Whisper 參數
         whisper_params_updated = {
             "language": whisper_params["language"],
             "task": whisper_params["task"],
             "verbose": True,      # True:顯示, False:不顯示細節
-            "temperature": whisper_params.get("temperature", 0.0),
+            "temperature": whisper_params["temperature"],
+            "best_of": whisper_params["best_of"],
+            "beam_size": whisper_params["beam_size"],
         }
         print(whisper_params_updated)
         
+        start_whisper_flickering_in_subprocess()  # 子程序運行，開始閃爍        
         # 開啟新執行緒以避免阻塞 GUI
         threading.Thread(target=process_audio, args=(file_path, text_area_raw, text_area_edit, selected_post_model, whisper_params_updated, output_path, output_filename, ollama_server, progress_var, selected_question_var), daemon=True).start()
 
@@ -683,22 +725,46 @@ def redo_action(text_widget):
     except tk.TclError:
         pass  # 沒有可重做的操作
         
+def clear_text():
+    text_area_raw.config(state=tk.NORMAL)
+    text_area_raw.delete('1.0', tk.END)
+    text_area_raw.config(state=tk.DISABLED)
+    text_area_edit.delete('1.0', tk.END)
+    
+def validate_inputs():
+    # 檢查 temperature 的範圍
+    if not (0 <= temperature_var.get() <= 1):
+        messagebox.showerror("錯誤", "Temperature 的範圍應該在 0 到 1 之間")
+        return False
+
+    # 檢查 best_of 的範圍
+    if not (1 <= best_of_var.get() <= 10):
+        messagebox.showerror("錯誤", "Best of 的範圍應該在 1 到 10 之間")
+        return False
+
+    # 檢查 beam_size 的範圍
+    if not (1 <= beam_size_var.get() <= 10):
+        messagebox.showerror("錯誤", "Beam size 的範圍應該在 1 到 10 之間")
+        return False
+
+    return True
+           
 
 # --- 圖形使用者介面建立 ---
 def create_gui():
     """
     創建圖形使用者介面。
     """
-    global root, whisper_frame, ollama_frame, text_area_raw, text_area_edit
+    global root, whisper_frame, ollama_frame, text_area_raw, text_area_edit, temperature_var, best_of_var, beam_size_var
     root = tk.Tk()
     root.title("影音檔轉文字工具")
 
     # 設定視窗大小
-    root.geometry("1400x1000+100+100")  # 設定主視窗大小與位置
+    root.geometry("1400x900+100+100")  # 設定主視窗大小與位置
 
     # --- Whisper 參數設定區 ---
     whisper_frame = tk.LabelFrame(root, text="Whisper 參數設定", padx=10, pady=10)
-    whisper_frame.pack(padx=10, pady=10, fill="x")
+    whisper_frame.pack(padx=10, pady=10, fill="x")   
     
     # 模型選擇
     tk.Label(whisper_frame, text="選擇 Whisper 模型：").grid(row=0, column=0, sticky="e", padx=5, pady=5)
@@ -712,12 +778,26 @@ def create_gui():
     # 顯示GPU or CPU    
     tk.Label(whisper_frame, text="Device：" + DEVICE).grid(row=0, column=2, sticky="w", padx=5, pady=5)
     
+    # Temperature 輸入框
+    tk.Label(whisper_frame, text="Temperature：").grid(row=0, column=4, sticky="e", padx=5, pady=5)
+    temperature_var = tk.DoubleVar(value=0)  # 預設值 0
+    temperature_entry = tk.Entry(whisper_frame, textvariable=temperature_var, width=10)
+    temperature_entry.grid(row=0, column=5, sticky="w", padx=5, pady=5)
+    tk.Label(whisper_frame, text="（範圍：0 ~ 1.0, 較低的值會使模型生成更確定、重複性高的結果，較高的值會使結果更加多樣性和隨機性。）").grid(row=0, column=6, columnspan=2, sticky="w", padx=5, pady=5)      
+    
      # 語言選擇
-    tk.Label(whisper_frame, text="選擇語言：").grid(row=1, column=0, sticky="e", padx=5, pady=5)
+    tk.Label(whisper_frame, text="選擇輸入音頻的語言：").grid(row=1, column=0, sticky="e", padx=5, pady=5)
     selected_language_var = tk.StringVar(value=SUPPORTED_LANGUAGES[0] if SUPPORTED_LANGUAGES else "無語言可用")
     language_menu = ttk.Combobox(whisper_frame, textvariable=selected_language_var, values=SUPPORTED_LANGUAGES, state="readonly")
     language_menu.grid(row=1, column=1, sticky="w", padx=5, pady=5)
     tk.Label(whisper_frame, text="（語言請於 config.ini 內增減）").grid(row=1, column=2, sticky="w")
+    
+    # Best of 輸入框
+    tk.Label(whisper_frame, text="Best of：").grid(row=1, column=4, sticky="e", padx=5, pady=5)
+    best_of_var = tk.IntVar(value=1)  # 預設值 1
+    best_of_entry = tk.Entry(whisper_frame, textvariable=best_of_var, width=10)
+    best_of_entry.grid(row=1, column=5, sticky="w", padx=5, pady=5)
+    tk.Label(whisper_frame, text="（範圍：1 ~ 10, 指定生成多個候選結果後選擇最佳的一個，但會增加處理時間。）").grid(row=1, column=6, columnspan=2, sticky="w", padx=5, pady=5)  
     
     # 任務類型選擇
     tk.Label(whisper_frame, text="選擇任務類型：").grid(row=2, column=0, sticky="e", padx=5, pady=5)
@@ -726,6 +806,14 @@ def create_gui():
     task_menu = ttk.Combobox(whisper_frame, textvariable=task_var, values=task_options, state="readonly")
     task_menu.grid(row=2, column=1, sticky="w", padx=5, pady=5)
     tk.Label(whisper_frame, text="（轉錄 transcribe、翻譯 translate）").grid(row=2, column=2, sticky="w")
+        
+    # Beam size 輸入框
+    tk.Label(whisper_frame, text="Beam size：").grid(row=2, column=4, sticky="e", padx=5, pady=5)
+    beam_size_var = tk.IntVar(value=5)  # 預設值 5
+    beam_size_entry = tk.Entry(whisper_frame, textvariable=beam_size_var, width=10)
+    beam_size_entry.grid(row=2, column=5, sticky="w", padx=5, pady=5)
+    tk.Label(whisper_frame, text="（範圍：1 ~ 10, 較大的 Beam Size 通常能提高轉錄的準確性，但會增加計算資源的消耗和處理時間。）").grid(row=2, column=6, columnspan=2, sticky="w", padx=5, pady=5)  
+    
     
     # --- Ollama 服務器設定區 ---
     ollama_frame = tk.LabelFrame(root, text="Ollama 服務器設定", padx=10, pady=10)
@@ -760,7 +848,7 @@ def create_gui():
     # 後處理類型選擇
     tk.Label(ollama_frame, text="選擇後處理類型：").grid(row=2, column=0, sticky="e", padx=5, pady=5)
     selected_question_var = tk.StringVar(value="訂正錯字")
-    question_options = ["訂正錯字", "訂正錯字+潤飾", "中文翻譯", "英文翻譯"]
+    question_options = ["訂正錯字", "訂正錯字+潤飾", "會議摘要", "會議紀錄", "重點摘要", "一行一句", "中文翻譯", "英文翻譯"]
     question_menu = ttk.Combobox(ollama_frame, textvariable=selected_question_var, values=question_options, state="readonly", width=30)
     question_menu.grid(row=2, column=1, sticky="w", padx=5, pady=5)
     tk.Label(ollama_frame, text="給語言模型的提示詞類型").grid(row=2, column=2, padx=15, sticky="e")
@@ -793,19 +881,17 @@ def create_gui():
     # --- 儲存訂正結果按鈕 ---
     save_button = tk.Button(button_frame, text="儲存訂正結果", command=lambda: save_correction(text_area_edit), width=10, height=1)
     save_button.pack(side=tk.LEFT, padx=30)
-   
+      
     # --- 選擇檔案按鈕 ---
-    select_button = tk.Button(button_frame, text="選擇音頻檔案", width=12, height=1, command=lambda: select_file(
+    select_button = tk.Button(button_frame, text="選擇音頻檔案", width=12, height=1, command=lambda: [clear_text(), select_file(
         text_area_raw, text_area_edit, post_model_selector, {
             "task": task_var.get(),
-            "language": selected_language_var.get()
-        }, output_path_var, output_filename_var, ollama_server_var, progress_var, selected_question_var))
+            "language": selected_language_var.get(),
+            "temperature": temperature_var.get(),
+            "best_of": best_of_var.get(),
+            "beam_size": beam_size_var.get()
+        }, output_path_var, output_filename_var, ollama_server_var, progress_var, selected_question_var)] if validate_inputs() else None)
     select_button.pack(side=tk.LEFT, padx=30)
-
-    # --- 進度條 ---
-    progress_var = tk.DoubleVar()
-    progress_bar = ttk.Progressbar(root, variable=progress_var, maximum=100)
-    progress_bar.pack(padx=10, pady=10, fill="x")
 
     # --- 文字顯示區域 ---
     display_frame = tk.Frame(root)
@@ -813,13 +899,13 @@ def create_gui():
     
     # 原始轉寫結果
     # text_area_raw = scrolledtext.ScrolledText(display_frame, wrap=tk.WORD, width=60, height=30, state=tk.DISABLED, undo=True)
-    text_area_raw = scrolledtext.ScrolledText(display_frame, wrap=tk.WORD, width=60, height=30, undo=True)
+    text_area_raw = scrolledtext.ScrolledText(display_frame, wrap=tk.WORD, width=60, height=25, undo=True)
     text_area_raw.pack(side=tk.LEFT, padx=5, pady=0, fill=tk.BOTH, expand=True)
     #text_area_raw.insert(tk.END, "這是一個唯讀的文字框。請選取文字，然後右鍵複製。")
     text_area_raw.config(state=tk.DISABLED)  # 插入文本後重新設置為唯讀
 
     # 編輯後的轉寫結果
-    text_area_edit = scrolledtext.ScrolledText(display_frame, wrap=tk.WORD, width=60, height=30, undo=True)
+    text_area_edit = scrolledtext.ScrolledText(display_frame, wrap=tk.WORD, width=60, height=25, undo=True)
     text_area_edit.pack(side=tk.LEFT, padx=5, pady=0, fill=tk.BOTH, expand=True)
     #text_area_edit.insert(tk.END, "這是一個可以用滑鼠右鍵複製內容的文字框。請選取文字，然後右鍵複製。")
 
@@ -850,8 +936,6 @@ def create_gui():
     # 綁定快捷鍵（僅對可編輯文字框有效）
     root.bind_all("<Control-z>", lambda event: undo_action(text_area_edit))
     root.bind_all("<Control-y>", lambda event: redo_action(text_area_edit))
-
-
     
     
      # --- 文字顯示區域 Label---
@@ -859,57 +943,15 @@ def create_gui():
     display_label_frame.pack(padx=5, pady=0, expand=True)
     tk.Label(display_label_frame, text="Whisper轉寫結果").pack(side=tk.LEFT, padx=300)
     tk.Label(display_label_frame, text="LLMs後處理結果").pack(side=tk.RIGHT, padx=300) 
+    
+    # --- 進度條 ---
+    progress_var = tk.DoubleVar()
+    progress_bar = ttk.Progressbar(root, variable=progress_var, maximum=100)
+    progress_bar.pack(padx=10, pady=10, fill="x")
 
     return root
 
-# --- 閃爍功能部分 ---
-stop_whisper_flicker = False  # 停止閃爍的標誌位
-stop_ollama_flicker = False   # 停止閃爍的標誌位
-colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00']
 
-def toggle_whisper_border_color(frame):
-    def update_color():
-        global stop_whisper_flicker
-        while not stop_whisper_flicker:
-            for color in colors:
-                if stop_whisper_flicker:
-                    break
-                frame.config(highlightbackground=color, highlightcolor=color, highlightthickness=1)
-                frame.update_idletasks()
-                time.sleep(0.5)  # 控制閃爍速度
-    threading.Thread(target=update_color, daemon=True).start()
-
-def stop_whisper_flickering():
-    global stop_whisper_flicker
-    stop_whisper_flicker = True
-    whisper_frame.config(highlightbackground="SystemButtonFace", highlightcolor="SystemButtonFace", highlightthickness=1)
-
-def toggle_ollama_border_color(frame):
-    def update_color():
-        global stop_ollama_flicker
-        while not stop_ollama_flicker:
-            for color in colors:
-                if stop_ollama_flicker:
-                    break
-                frame.config(highlightbackground=color, highlightcolor=color, highlightthickness=1)
-                frame.update_idletasks()
-                time.sleep(0.5)  # 控制閃爍速度
-    threading.Thread(target=update_color, daemon=True).start()
-
-def stop_ollama_flickering():
-    global stop_ollama_flicker
-    stop_ollama_flicker = True
-    ollama_frame.config(highlightbackground="SystemButtonFace", highlightcolor="SystemButtonFace", highlightthickness=1)
-
-def start_whisper_flickering_in_subprocess():
-    global stop_whisper_flicker
-    stop_whisper_flicker = False
-    toggle_whisper_border_color(whisper_frame)
-
-def start_ollama_flickering_in_subprocess():
-    global stop_ollama_flicker
-    stop_ollama_flicker = False
-    toggle_ollama_border_color(ollama_frame)
 
 # --- 主程序 ---
 if __name__ == "__main__":
