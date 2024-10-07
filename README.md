@@ -50,7 +50,7 @@
      打開 **命令提示字元**，執行 `ffmpeg -version`，應顯示 FFmpeg 的版本資訊。
 
 4. **安裝PyTorch’s CUDA support**
-
+   - 前往 [PyTorch 官方頁面](https://pytorch.org/get-started/locally/)。
 
 
 
