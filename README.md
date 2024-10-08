@@ -1,6 +1,8 @@
 
 # **將 Whisper 轉錄出的文字傳送給 LLMs 進行後處理**
 
+中文 | [English](./README-En.md)
+
 ## **前置準備**
 
 ### 1. **安裝 Python**
