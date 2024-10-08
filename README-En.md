@@ -1,6 +1,8 @@
 
 # **Sending Whisper Transcripts to LLMs for Post-processing**
 
+[中文](./README.md) | English
+
 ## **Prerequisites**
 
 ### 1. **Install Python**
